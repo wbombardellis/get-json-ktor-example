@@ -29,13 +29,17 @@ fun main() {
                 json(Json { ignoreUnknownKeys = true })
             }
         }
-        val response = client.get("https://jsonplaceholder.typicode.com/users")
-        val users = response.body<List<User>>()
+        try {
+            val response = client.get("https://jsonplaceholder.typicode.com/users")
+            val users = response.body<List<User>>()
 
-        users.filter { it.address.city == "Gwenborough" }
-            .takeIf { it.isNotEmpty() }
-            ?.forEach {
-                println("Name: ${it.name}, Username: ${it.username}, Email: ${it.email}, City: ${it.address.city}")
-            } ?: println("No users found")
+            users.filter { it.address.city == "Gwenborough" }
+                .takeIf { it.isNotEmpty() }
+                ?.forEach {
+                    println("Name: ${it.name}, Username: ${it.username}, Email: ${it.email}, City: ${it.address.city}")
+                } ?: println("No users found")
+        } catch(e: Exception) {
+            println("Error: ${e.message}")
+        }
     }
 }
