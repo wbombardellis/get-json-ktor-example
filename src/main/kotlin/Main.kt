@@ -24,44 +24,18 @@ data class User(
 
 fun main() {
     runBlocking {
-        val httpClient = HttpClient(CIO) {
+        val client = HttpClient(CIO) {
             install(ContentNegotiation) {
-                json(Json {
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                })
+                json(Json { ignoreUnknownKeys = true })
             }
         }
-        httpClient.use { client ->
-            val getResponse = runCatching {
-                client.get("https://jsonplaceholder.typicode.com/users")
-            }.onFailure {
-                println("An error occurred when trying to get list. Message: ${it.message}")
-            }.getOrNull()
+        val response = client.get("https://jsonplaceholder.typicode.com/users")
+        val users = response.body<List<User>>()
 
-            if (getResponse != null) {
-                val userList = runCatching {
-                    getResponse.body<List<User>>()
-                }.onFailure {
-                    println("An error occurred when trying to parse the list. Message: ${it.message}")
-                }.getOrNull()
-
-                if (userList != null) {
-                    println("Which city do you want?")
-                    val desiredCity = readlnOrNull()
-                    val desiredUsers = userList.filter { it.address.city == desiredCity }
-
-                    desiredUsers.ifEmpty {
-                        println("No users found")
-                        emptyList()
-                    }.forEach {
-                        println("Name: ${it.name}")
-                        println("Username: ${it.username}")
-                        println("Email: ${it.email}")
-                        println("City: ${it.address.city}")
-                    }
-                }
-            }
-        }
+        users.filter { it.address.city == "Gwenborough" }
+            .takeIf { it.isNotEmpty() }
+            ?.forEach {
+                println("Name: ${it.name}, Username: ${it.username}, Email: ${it.email}, City: ${it.address.city}")
+            } ?: println("No users found")
     }
 }
